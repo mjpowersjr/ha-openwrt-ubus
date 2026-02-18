@@ -1,0 +1,10 @@
+{
+  "domain": "openwrt_ubus",
+  "name": "OpenWrt (ubus)",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/your-repo/ha-openwrt-ubus",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "version": "0.1.0"
+}

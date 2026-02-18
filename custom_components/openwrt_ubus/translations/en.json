@@ -1,0 +1,108 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to OpenWrt Router",
+        "description": "Enter the connection details for your OpenWrt router. Ensure uhttpd-mod-ubus is installed and a ubus ACL has been configured.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "username": "Username",
+          "password": "Password",
+          "ssl": "Use HTTPS",
+          "verify_ssl": "Verify SSL certificate",
+          "dhcp_software": "DHCP software"
+        },
+        "data_description": {
+          "host": "Hostname or IP address of your OpenWrt router",
+          "dhcp_software": "Used to resolve client hostnames from DHCP leases"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "The credentials for {host} are no longer valid. Please enter updated credentials.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the router. Check the host, port, and HTTPS settings.",
+      "invalid_auth": "Invalid username or password.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This router is already configured.",
+      "reauth_successful": "Re-authentication was successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "OpenWrt Options",
+        "data": {
+          "track_devices": "Track WiFi devices",
+          "consider_home": "Consider home interval (seconds)",
+          "device_tracker_scan_interval": "Device tracker scan interval (seconds)",
+          "stats_scan_interval": "Stats scan interval (seconds)"
+        },
+        "data_description": {
+          "consider_home": "Time in seconds to consider a device as home after it disconnects (0-600)",
+          "device_tracker_scan_interval": "How often to scan for WiFi clients (10-300)",
+          "stats_scan_interval": "How often to poll router statistics (30-600)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "uptime": {
+        "name": "Uptime"
+      },
+      "load_1m": {
+        "name": "Load average (1m)"
+      },
+      "load_5m": {
+        "name": "Load average (5m)"
+      },
+      "load_15m": {
+        "name": "Load average (15m)"
+      },
+      "memory_usage": {
+        "name": "Memory usage"
+      },
+      "memory_free": {
+        "name": "Memory free"
+      },
+      "firmware_version": {
+        "name": "Firmware version"
+      },
+      "connected_clients": {
+        "name": "Connected clients"
+      },
+      "wan_ipv4": {
+        "name": "WAN IPv4 address"
+      },
+      "tx_bytes": {
+        "name": "TX bytes"
+      },
+      "rx_bytes": {
+        "name": "RX bytes"
+      },
+      "wifi_clients": {
+        "name": "WiFi clients"
+      }
+    },
+    "binary_sensor": {
+      "wan_connected": {
+        "name": "WAN connected"
+      }
+    },
+    "button": {
+      "reboot": {
+        "name": "Reboot"
+      }
+    }
+  }
+}
