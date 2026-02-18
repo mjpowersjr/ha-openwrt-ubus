@@ -142,6 +142,7 @@ class DeviceTrackerCoordinator(DataUpdateCoordinator[DeviceTrackerData]):
         self._known_macs: set[str] = set()
         self._hostapd_interfaces: list[str] | None = None
         self._dhcp_cache: dict[str, tuple[str | None, str | None]] = {}
+        self._dnsmasq_leasefile: str | None = None
 
     async def _async_update_data(self) -> DeviceTrackerData:
         """Fetch WiFi client data from all hostapd interfaces."""
@@ -269,10 +270,32 @@ class DeviceTrackerCoordinator(DataUpdateCoordinator[DeviceTrackerData]):
         except UbusError:
             _LOGGER.debug("Failed to refresh DHCP lease cache")
 
-    async def _parse_dnsmasq_leases(self) -> None:
-        """Parse /tmp/dhcp.leases (dnsmasq format)."""
+    async def _resolve_dnsmasq_leasefile(self) -> str:
+        """Resolve the dnsmasq lease file path from UCI config."""
+        if self._dnsmasq_leasefile is not None:
+            return self._dnsmasq_leasefile
+
         try:
-            result = await self.client.file_read("/tmp/dhcp.leases")
+            result = await self.client.get_uci_config("dhcp")
+            values = result.get("values", {})
+            for section_data in values.values():
+                if section_data.get(".type") == "dnsmasq":
+                    path = section_data.get("leasefile")
+                    if path:
+                        self._dnsmasq_leasefile = path
+                        _LOGGER.debug("Resolved dnsmasq leasefile: %s", path)
+                        return path
+        except UbusError:
+            _LOGGER.debug("Could not read dnsmasq UCI config for leasefile")
+
+        self._dnsmasq_leasefile = "/tmp/dhcp.leases"
+        return self._dnsmasq_leasefile
+
+    async def _parse_dnsmasq_leases(self) -> None:
+        """Parse dnsmasq lease file."""
+        leasefile = await self._resolve_dnsmasq_leasefile()
+        try:
+            result = await self.client.file_read(leasefile)
         except UbusError:
             return
 
