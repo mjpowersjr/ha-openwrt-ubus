@@ -9,7 +9,7 @@ A modern [Home Assistant](https://www.home-assistant.io/) custom integration for
 | `device_tracker` | 1 per WiFi client | Presence detection via hostapd, with consider-home logic |
 | `sensor` | ~8 system + dynamic per-interface | Uptime, load, memory, firmware, WAN IP, TX/RX bytes, WiFi client counts |
 | `binary_sensor` | 1 | WAN connectivity status |
-| `switch` | 1 per WiFi radio | Enable/disable radios (2.4 GHz, 5 GHz, 6 GHz) via UCI |
+| `switch` | 1 per radio + 1 per AP | Enable/disable radios and individual SSIDs via UCI |
 | `button` | 1 | Reboot the router |
 | `diagnostics` | &mdash; | Downloadable redacted diagnostic dump |
 
@@ -114,7 +114,9 @@ cat > /usr/share/rpcd/acl.d/ha.json << 'EOF'
         "description": "Home Assistant integration access",
         "read": {
             "file": {
-                "/tmp/dhcp.leases": ["read"]
+                "/tmp/dhcp.leases": ["read"],
+                "/mnt/*/dhcp.leases": ["read"],
+                "/tmp/hosts/odhcpd": ["read"]
             },
             "ubus": {
                 "system": ["board", "info"],
@@ -231,9 +233,11 @@ One entity per WiFi client, with extra attributes:
 
 ### Switch
 
-One per WiFi radio (e.g., "WiFi 2.4 GHz (radio0)"). Toggles the radio via UCI (`wireless.radioN.disabled`).
+**Radio switches** &mdash; one per physical radio (e.g., "Radio 2.4 GHz (radio0)"). Toggles the entire radio via UCI (`wireless.radioN.disabled`). Disabling a radio kills all SSIDs on that band.
 
-> **Note:** The toggle writes the UCI config and commits it. On some routers the change takes effect immediately; on others a `wifi reload` may be needed on the router for the radio to actually go up or down.
+**AP switches** &mdash; one per WiFi interface/SSID (e.g., "AP the-cortex-guest 2.4 GHz"). Toggles individual APs via UCI (`wireless.<iface>.disabled`). This lets you disable a specific SSID (like a guest or kids network) without affecting other SSIDs on the same radio.
+
+> **Note:** Toggling writes UCI config and commits it. On some routers the change takes effect immediately; on others a `wifi reload` may be needed on the router.
 
 ### Button
 
